@@ -7,6 +7,7 @@ import (
 	"gopkg.in/resty.v1"
 	"log"
 	"os"
+	"strconv"
 )
 
 // VERSION
@@ -29,7 +30,7 @@ type Feed struct {
 		UpdatedAt string `json:"updated_at"`
 		Description string `json:"description"`
 		Count int `json:"count"`
-		Asn string `json:"asn"`
+		Asn float32 `json:"asn"`
 		Asn_desc string `json:"asn_desc"`
 		Cc string `json:"cc"`
 		Provider string `json:"provider"`
@@ -38,45 +39,22 @@ type Feed struct {
 	} `json:"indicators"`
 }
 
-
-
-//https://www.scaledrone.com/blog/creating-an-api-client-in-go/
-
-func main() {
-
-	user := flag.String("user", "csirtgadgets", "user")
-	feed := flag.String( "feed", "darknet", "feed name" )
-	token := os.Getenv("CSIRTG_TOKEN")
-
-	flag.Parse()
-
-	url := fmt.Sprintf("https://csirtg.io/api/users/%s/feeds/%s", *user, *feed)
-
-	resty.SetDebug(true)
-	resp, err := resty.R().
-		SetQueryParams(map[string]string{
-		"limit": "20",
-		}).
-		SetHeader("Accept", "application/json").
-		SetHeader("User-Agent", fmt.Sprintf("csirtgsdk-go/%s", VERSION)).
-		SetAuthToken(token).
-		SetResult(&Feed{}).
-		Get(url)
-
-	if err != nil {
-		log.Fatalf("ERROR: %s", err)
-	}
-	var f = resp.Result().(*Feed)
-	//spew.Dump(f.Indicators)
+func toCsv(f *Feed) {
 
 	w := csv.NewWriter(os.Stdout)
 
 	for _, i := range f.Indicators {
 		r := []string{
-			i.Itype,
+			//strconv.Itoa(i.Id),
 			i.Indicator,
-			i.Asn,
+			i.Itype,
+			i.Portlist,
+			i.Firsttime,
+			strconv.Itoa(i.Count),
+			fmt.Sprintf("%0.f", i.Asn),
 			i.Asn_desc,
+			i.Description,
+			i.Provider,
 		}
 
 		if err := w.Write(r); err != nil {
@@ -90,6 +68,51 @@ func main() {
 	if err := w.Error(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+
+
+//https://www.scaledrone.com/blog/creating-an-api-client-in-go/
+
+func main() {
+
+	user := flag.String("user", "csirtgadgets", "user")
+	feed := flag.String( "feed", "darknet", "feed name" )
+	limit := flag.String("limit", "25", "result limit")
+	format := flag.String("format", "csv", "output format")
+	debug := flag.Bool("debug", false, "turn on debugging")
+	token := os.Getenv("CSIRTG_TOKEN")
+
+	flag.Parse()
+
+	url := fmt.Sprintf("https://csirtg.io/api/users/%s/feeds/%s", *user, *feed)
+
+	if *debug == true {
+		resty.SetDebug(true)
+	}
+
+	resp, err := resty.R().
+		SetQueryParams(map[string]string{
+		"limit": *limit,
+		}).
+		SetHeader("Accept", "application/json").
+		SetHeader("User-Agent", fmt.Sprintf("csirtgsdk-go/%s", VERSION)).
+		SetAuthToken(token).
+		SetResult(&Feed{}).
+		Get(url)
+
+	if err != nil {
+		log.Fatalf("ERROR: %s", err)
+	}
+	var f = resp.Result().(*Feed)
+
+	if *format == "csv" {
+		toCsv(f)
+	} else {
+		fmt.Println("Format doesn't exist yet, SEND US A PR!")
+	}
+
+
 
 
 }
