@@ -11,7 +11,7 @@ import (
 )
 
 // VERSION
-const VERSION = "0.0a0"
+const VERSION = "0.0a1"
 
 type Feed struct {
 	Name string `json:"name"`
