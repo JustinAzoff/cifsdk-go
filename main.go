@@ -2,16 +2,38 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/resty.v1"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // VERSION
-const VERSION = "0.0a1"
+const VERSION = "0.0a2"
+
+type Indicator struct {
+	Id int `json:"id"`
+	Indicator string `json:"indicator"`
+	Itype string `json:"itype"`
+	Portlist string `json:"portlist"`
+	Firsttime string `json:"firsttime"`
+	Lasttime string `json:"lasttime"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+	Description string `json:"description"`
+	Count int `json:"count"`
+	Asn float32 `json:"asn"`
+	Asn_desc string `json:"asn_desc"`
+	Cc string `json:"cc"`
+	Provider string `json:"provider"`
+	Tags []string `json:"tags"`
+	Content string `json:"content"`
+}
 
 type Feed struct {
 	Name string `json:"name"`
@@ -19,24 +41,7 @@ type Feed struct {
 	Description string `json:"description"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
-	Indicators []struct {
-		Id int `json:"id"`
-		Indicator string `json:"indicator"`
-		Itype string `json:"itype"`
-		Portlist string `json:"portlist"`
-		Firsttime string `json:"firsttime"`
-		Lasttime string `json:"lasttime"`
-		CreatedAt string `json:"created_at"`
-		UpdatedAt string `json:"updated_at"`
-		Description string `json:"description"`
-		Count int `json:"count"`
-		Asn float32 `json:"asn"`
-		Asn_desc string `json:"asn_desc"`
-		Cc string `json:"cc"`
-		Provider string `json:"provider"`
-		Tags []string `json:"tags"`
-		Content string `json:"content"`
-	} `json:"indicators"`
+	Indicators []Indicator `json:"indicators"`
 }
 
 func toCsv(f *Feed) {
@@ -71,6 +76,61 @@ func toCsv(f *Feed) {
 }
 
 
+func createIndicator(token string, user string, feed string, i *Indicator) bool {
+	url := fmt.Sprintf("https://csirtg.io/api/users/%s/feeds/%s/indicators", user, feed)
+
+	fmt.Println(url)
+
+	s, err := json.Marshal(i)
+
+	var s1 strings.Builder
+	s1.WriteString(`{"indicator": `)
+	s1.WriteString(string(s))
+	s1.WriteString(`}`)
+
+	resp, err := resty.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("User-Agent", fmt.Sprintf("csirtgsdk-go/%s", VERSION)).
+		SetAuthToken(token).
+		SetBody(s1.String()).
+		Post(url)
+
+	if err != nil {
+		log.Fatalf("ERROR: %s", err)
+		return false
+	}
+
+	spew.Dump(resp)
+
+	return true
+}
+
+func getFeed(token string, user string, feed string, limit string) *Feed {
+
+	if limit == "" {
+		limit = "25"
+	}
+
+	url := fmt.Sprintf("https://csirtg.io/api/users/%s/feeds/%s", user, feed)
+
+	resp, err := resty.R().
+		SetQueryParams(map[string]string{
+			"limit": limit,
+		}).
+		SetHeader("Accept", "application/json").
+		SetHeader("User-Agent", fmt.Sprintf("csirtgsdk-go/%s", VERSION)).
+		SetAuthToken(token).
+		SetResult(&Feed{}).
+		Get(url)
+
+	if err != nil {
+		log.Fatalf("ERROR: %s", err)
+	}
+
+	return resp.Result().(*Feed)
+}
+
+
 
 //https://www.scaledrone.com/blog/creating-an-api-client-in-go/
 
@@ -83,34 +143,36 @@ func main() {
 	debug := flag.Bool("debug", false, "turn on debugging")
 	token := os.Getenv("CSIRTG_TOKEN")
 
-	flag.Parse()
+	indicator := flag.String("indicator", "", "set indicator" )
+	tags := flag.String("tags", "", "ssh,scanner,...")
+	description := flag.String("description", "", "honeypot scanner")
 
-	url := fmt.Sprintf("https://csirtg.io/api/users/%s/feeds/%s", *user, *feed)
+	flag.Parse()
 
 	if *debug == true {
 		resty.SetDebug(true)
 	}
 
-	resp, err := resty.R().
-		SetQueryParams(map[string]string{
-		"limit": *limit,
-		}).
-		SetHeader("Accept", "application/json").
-		SetHeader("User-Agent", fmt.Sprintf("csirtgsdk-go/%s", VERSION)).
-		SetAuthToken(token).
-		SetResult(&Feed{}).
-		Get(url)
+	if *indicator != "" {
+		var i = &Indicator{
+			Indicator: *indicator,
+			Tags: strings.Split(*tags, ","),
+			Description: *description,
+		}
 
-	if err != nil {
-		log.Fatalf("ERROR: %s", err)
-	}
-	var f = resp.Result().(*Feed)
-
-	if *format == "csv" {
-		toCsv(f)
+		var r = createIndicator(token, *user, *feed, i)
+		spew.Dump(r)
 	} else {
-		fmt.Println("Format doesn't exist yet, SEND US A PR!")
+		var f = getFeed(token, *user, *feed, *limit)
+
+		if *format == "csv" {
+			toCsv(f)
+		} else {
+			fmt.Println("Format doesn't exist yet, SEND US A PR!")
+		}
 	}
+
+
 
 
 
