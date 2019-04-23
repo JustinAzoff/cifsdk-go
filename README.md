@@ -1,21 +1,14 @@
-# csirtgsdk-go
-Go Implementation of the CSIRTGSDK https://csirtg.io
+# cifsdk-go
+Go Implementation of the CIF SDK https://github.com/csirtgadgets/verbose-robot/
 
 # Getting Started
 
 ```bash
-$ export CSIRTG_TOKEN=123123123
+$ export CIF_TOKEN=123123123
 
-$ go run main.go 
-
-# id,indicator,itype,portlist,firsttime,count,protocol,application,asn,cc,lasttime,description,provider 
-12913172,178.46.48.38,ipv4,23,2018-12-01 21:31:40 UTC,1,6,,12389.0,RU ,2018-12-01 21:31:40 UTC,sourced from firewall logs (incomming  tcp  syn  blocked),
-12913206,112.68.55.26,ipv4,23,2018-12-01 21:40:51 UTC,1,6,,17511.0,JP ,2018-12-01 21:40:51 UTC,sourced from firewall logs (incomming  tcp  syn  blocked),
-12913212,79.133.98.142,ipv4,3389,2018-12-01 21:41:38 UTC,1,6,,57311.0,RU ,2018-12-01 21:41:38 UTC,sourced from firewall logs (incomming  tcp  syn  blocked),
-..
-
-$ go run main.go -user csirtgadgets -feed darknet
+$ go run cmd/cifsdk-go/main.go  -feed ipv4 -endpoint http://192.168.99.100:5000
+77.247.109.205,ipv4,,,3,209299,vitox telecom,identified as sending recursive dns queries to a remote host,dataplane.org
+173.249.14.216,ipv4,,,2,51167,contabo gmbh,identified as sending recursive dns queries to a remote host,dataplane.org
+81.171.71.127,ipv4,,,2,33438,"highwinds network group, inc.",identified as sending recursive dns queries to a remote host,dataplane.org
+81.171.71.128,ipv4,,,2,33438,"highwinds network group, inc.",identified as sending recursive dns queries to a remote host,dataplane.org
 ...
-
-$ go build -o csirtg main.go
-```
