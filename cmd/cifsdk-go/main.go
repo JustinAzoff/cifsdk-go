@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -14,12 +15,12 @@ import (
 
 func main() {
 
-	user := flag.String("user", "csirtgadgets", "user")
+	endpoint := flag.String("endpoint", "http://localhost:5000", "cif endpoint")
 	feed := flag.String("feed", "darknet", "feed name")
 	limit := flag.String("limit", "25", "result limit")
 	format := flag.String("format", "csv", "output format")
-	//debug := flag.Bool("debug", false, "turn on debugging")
-	token := os.Getenv("CSIRTG_TOKEN")
+	debug := flag.Bool("debug", false, "turn on debugging")
+	token := os.Getenv("CIF_TOKEN")
 
 	indicator := flag.String("indicator", "", "set indicator")
 	tags := flag.String("tags", "", "ssh,scanner,...")
@@ -31,6 +32,12 @@ func main() {
 	//	resty.SetDebug(true)
 	//}
 
+	c := &cif.Client{
+		Endpoint: *endpoint,
+		Token:    token,
+		Debug:    *debug,
+	}
+
 	if *indicator != "" {
 		var i = &cif.Indicator{
 			Indicator:   *indicator,
@@ -38,10 +45,13 @@ func main() {
 			Description: *description,
 		}
 
-		var r = cif.CreateIndicator(token, *user, *feed, i)
+		var r = c.CreateIndicator(i)
 		spew.Dump(r)
 	} else {
-		var f = cif.GetFeed(token, *user, *feed, *limit)
+		var f, err = c.GetFeed(*feed, *limit)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		if *format == "csv" {
 			cif.ToCsv(f, os.Stdout)

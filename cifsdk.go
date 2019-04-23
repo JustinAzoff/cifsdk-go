@@ -3,9 +3,7 @@ package cifsdk
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
-	"strings"
 
 	"github.com/davecgh/go-spew/spew"
 	resty "gopkg.in/resty.v1"
@@ -13,6 +11,7 @@ import (
 
 // VERSION
 const VERSION = "0.0a3"
+const USER_AGENT = "cifsdk-go/" + VERSION
 
 type Indicator struct {
 	Id          int      `json:"id"`
@@ -50,57 +49,66 @@ func getEnvWithDefault(key, fallback string) string {
 	return value
 }
 
-func CreateIndicator(token string, user string, feed string, i *Indicator) bool {
-	url := fmt.Sprintf("https://csirtg.io/api/users/%s/feeds/%s/indicators", user, feed)
+type Client struct {
+	Endpoint string
+	Token    string
+	Debug    bool
+}
 
-	s, err := json.Marshal(i)
+type indicatorReq struct {
+	Indicator *Indicator `json:"indicator"`
+}
 
-	var s1 strings.Builder
-	s1.WriteString(`{"indicator": `)
-	s1.WriteString(string(s))
-	s1.WriteString(`}`)
+func (c *Client) CreateIndicator(i *Indicator) error {
+	url := fmt.Sprintf("%s/indicators/", c.Endpoint)
+
+	s, err := json.Marshal(&indicatorReq{i})
+	if err != nil {
+		return err
+	}
 
 	resp, err := resty.R().
 		SetHeader("Content-Type", "application/json").
-		SetHeader("User-Agent", fmt.Sprintf("csirtgsdk-go/%s", VERSION)).
-		SetAuthToken(token).
-		SetBody(s1.String()).
+		SetHeader("User-Agent", USER_AGENT).
+		SetHeader("Authorization", c.Token).
+		SetBody(s).
 		Post(url)
 
 	if err != nil {
-		log.Fatalf("ERROR: %s", err)
-		return false
+		return err
 	}
 
-	debug := getEnvWithDefault("DEBUG", "0")
-	if debug == "1" {
+	if c.Debug {
 		spew.Dump(resp)
 	}
 
-	return true
+	return nil
 }
 
-func GetFeed(token string, user string, feed string, limit string) *Feed {
-
+func (c *Client) GetFeed(feed string, limit string) (*Feed, error) {
 	if limit == "" {
 		limit = "25"
 	}
 
-	url := fmt.Sprintf("https://csirtg.io/api/users/%s/feeds/%s", user, feed)
+	url := fmt.Sprintf("%s/indicators/", c.Endpoint)
 
 	resp, err := resty.R().
 		SetQueryParams(map[string]string{
 			"limit": limit,
+			"itype": feed,
 		}).
 		SetHeader("Accept", "application/json").
-		SetHeader("User-Agent", fmt.Sprintf("csirtgsdk-go/%s", VERSION)).
-		SetAuthToken(token).
+		SetHeader("User-Agent", USER_AGENT).
+		SetHeader("Authorization", c.Token).
 		SetResult(&Feed{}).
 		Get(url)
 
 	if err != nil {
-		log.Fatalf("ERROR: %s", err)
+		return nil, err
+	}
+	if c.Debug {
+		spew.Dump(resp)
 	}
 
-	return resp.Result().(*Feed)
+	return resp.Result().(*Feed), nil
 }
