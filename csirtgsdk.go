@@ -4,43 +4,43 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	"gopkg.in/resty.v1"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // VERSION
 const VERSION = "0.0a3"
 
 type Indicator struct {
-	Id int `json:"id"`
-	Indicator string `json:"indicator"`
-	Itype string `json:"itype"`
-	Portlist string `json:"portlist"`
-	Firsttime string `json:"firsttime"`
-	Lasttime string `json:"lasttime"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	Description string `json:"description"`
-	Count int `json:"count"`
-	Asn float32 `json:"asn"`
-	Asn_desc string `json:"asn_desc"`
-	Cc string `json:"cc"`
-	Provider string `json:"provider"`
-	Tags []string `json:"tags"`
-	Content string `json:"content"`
+	Id          int      `json:"id"`
+	Indicator   string   `json:"indicator"`
+	Itype       string   `json:"itype"`
+	Portlist    string   `json:"portlist"`
+	Firsttime   string   `json:"firsttime"`
+	Lasttime    string   `json:"lasttime"`
+	CreatedAt   string   `json:"created_at"`
+	UpdatedAt   string   `json:"updated_at"`
+	Description string   `json:"description"`
+	Count       int      `json:"count"`
+	Asn         float32  `json:"asn"`
+	Asn_desc    string   `json:"asn_desc"`
+	Cc          string   `json:"cc"`
+	Provider    string   `json:"provider"`
+	Tags        []string `json:"tags"`
+	Content     string   `json:"content"`
 }
 
 type Feed struct {
-	Name string `json:"name"`
-	User string `json:"user"`
-	Description string `json:"description"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	Indicators []Indicator `json:"indicators"`
+	Name        string      `json:"name"`
+	User        string      `json:"user"`
+	Description string      `json:"description"`
+	CreatedAt   string      `json:"created_at"`
+	UpdatedAt   string      `json:"updated_at"`
+	Indicators  []Indicator `json:"indicators"`
 }
 
 func getEnvWithDefault(key, fallback string) string {
@@ -81,7 +81,6 @@ func ToCsv(f *Feed) {
 		log.Fatal(err)
 	}
 }
-
 
 func CreateIndicator(token string, user string, feed string, i *Indicator) bool {
 	url := fmt.Sprintf("https://csirtg.io/api/users/%s/feeds/%s/indicators", user, feed)
