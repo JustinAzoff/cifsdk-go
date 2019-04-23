@@ -31,15 +31,7 @@ type Indicator struct {
 	Tags        []string `json:"tags"`
 	Content     string   `json:"content"`
 }
-
-type Feed struct {
-	Name        string      `json:"name"`
-	User        string      `json:"user"`
-	Description string      `json:"description"`
-	CreatedAt   string      `json:"created_at"`
-	UpdatedAt   string      `json:"updated_at"`
-	Indicators  []Indicator `json:"indicators"`
-}
+type IndicatorList []Indicator
 
 func getEnvWithDefault(key, fallback string) string {
 	value := os.Getenv(key)
@@ -85,22 +77,21 @@ func (c *Client) CreateIndicator(i *Indicator) error {
 	return nil
 }
 
-func (c *Client) GetFeed(feed string, limit string) (*Feed, error) {
+func (c *Client) GetIndicators(itype string, limit string) (*IndicatorList, error) {
 	if limit == "" {
 		limit = "25"
 	}
-
 	url := fmt.Sprintf("%s/indicators/", c.Endpoint)
 
 	resp, err := resty.R().
 		SetQueryParams(map[string]string{
 			"limit": limit,
-			"itype": feed,
+			"itype": itype,
 		}).
 		SetHeader("Accept", "application/json").
 		SetHeader("User-Agent", USER_AGENT).
 		SetHeader("Authorization", c.Token).
-		SetResult(&Feed{}).
+		SetResult(&IndicatorList{}).
 		Get(url)
 
 	if err != nil {
@@ -110,5 +101,5 @@ func (c *Client) GetFeed(feed string, limit string) (*Feed, error) {
 		spew.Dump(resp)
 	}
 
-	return resp.Result().(*Feed), nil
+	return resp.Result().(*IndicatorList), nil
 }

@@ -48,7 +48,7 @@ func main() {
 		var r = c.CreateIndicator(i)
 		spew.Dump(r)
 	} else {
-		var f, err = c.GetFeed(*feed, *limit)
+		var f, err = c.GetIndicators(*feed, *limit)
 		if err != nil {
 			log.Fatal(err)
 		}
