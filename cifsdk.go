@@ -75,7 +75,7 @@ func (c *Client) CreateIndicators(i *IndicatorList) error {
 	return nil
 }
 
-func (c *Client) GetIndicators(itype string, limit string) (*IndicatorList, error) {
+func (c *Client) GetIndicators(itype string, limit string) (IndicatorList, error) {
 	resty.SetTimeout(15 * time.Second)
 	if limit == "" {
 		limit = "25"
@@ -90,7 +90,7 @@ func (c *Client) GetIndicators(itype string, limit string) (*IndicatorList, erro
 		SetHeader("Accept", "application/json").
 		SetHeader("User-Agent", USER_AGENT).
 		SetHeader("Authorization", c.Token).
-		SetResult(&IndicatorList{}).
+		SetResult(IndicatorList{}).
 		Get(url)
 
 	if err != nil {
@@ -100,5 +100,6 @@ func (c *Client) GetIndicators(itype string, limit string) (*IndicatorList, erro
 		spew.Dump(resp)
 	}
 
-	return resp.Result().(*IndicatorList), nil
+	lst := resp.Result().(*IndicatorList)
+	return *lst, nil
 }

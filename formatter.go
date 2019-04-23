@@ -8,10 +8,10 @@ import (
 	"strconv"
 )
 
-func ToCsv(indicators *IndicatorList, ow io.Writer) {
+func ToCsv(indicators IndicatorList, ow io.Writer) {
 	w := csv.NewWriter(ow)
 
-	for _, i := range *indicators {
+	for _, i := range indicators {
 		r := []string{
 			//strconv.Itoa(i.Id),
 			i.Indicator,
