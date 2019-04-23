@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	resty "gopkg.in/resty.v1"
@@ -48,6 +49,7 @@ type Client struct {
 }
 
 func (c *Client) CreateIndicators(i *IndicatorList) error {
+	resty.SetTimeout(15 * time.Second)
 	url := fmt.Sprintf("%s/indicators/", c.Endpoint)
 
 	s, err := json.Marshal(i)
@@ -74,6 +76,7 @@ func (c *Client) CreateIndicators(i *IndicatorList) error {
 }
 
 func (c *Client) GetIndicators(itype string, limit string) (*IndicatorList, error) {
+	resty.SetTimeout(15 * time.Second)
 	if limit == "" {
 		limit = "25"
 	}
