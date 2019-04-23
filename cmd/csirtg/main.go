@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/csirtgadgets/csirtgsdk-go/csirtgsdk"
 	"github.com/davecgh/go-spew/spew"
 	"os"
 	"strings"
-	"github.com/csirtgadgets/csirtgsdk-go/csirtgsdk"
 )
 
 //https://www.scaledrone.com/blog/creating-an-api-client-in-go/
@@ -14,13 +14,13 @@ import (
 func main() {
 
 	user := flag.String("user", "csirtgadgets", "user")
-	feed := flag.String( "feed", "darknet", "feed name" )
+	feed := flag.String("feed", "darknet", "feed name")
 	limit := flag.String("limit", "25", "result limit")
 	format := flag.String("format", "csv", "output format")
 	//debug := flag.Bool("debug", false, "turn on debugging")
 	token := os.Getenv("CSIRTG_TOKEN")
 
-	indicator := flag.String("indicator", "", "set indicator" )
+	indicator := flag.String("indicator", "", "set indicator")
 	tags := flag.String("tags", "", "ssh,scanner,...")
 	description := flag.String("description", "", "honeypot scanner")
 
@@ -32,8 +32,8 @@ func main() {
 
 	if *indicator != "" {
 		var i = &csirtgsdk.Indicator{
-			Indicator: *indicator,
-			Tags: strings.Split(*tags, ","),
+			Indicator:   *indicator,
+			Tags:        strings.Split(*tags, ","),
 			Description: *description,
 		}
 
