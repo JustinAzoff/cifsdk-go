@@ -3,10 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/csirtgadgets/csirtgsdk-go/csirtgsdk"
-	"github.com/davecgh/go-spew/spew"
 	"os"
 	"strings"
+
+	"github.com/csirtgadgets/csirtgsdk-go/csirtgsdk"
+	"github.com/davecgh/go-spew/spew"
 )
 
 //https://www.scaledrone.com/blog/creating-an-api-client-in-go/
@@ -43,7 +44,7 @@ func main() {
 		var f = csirtgsdk.GetFeed(token, *user, *feed, *limit)
 
 		if *format == "csv" {
-			csirtgsdk.ToCsv(f)
+			csirtgsdk.ToCsv(f, os.Stdout)
 		} else {
 			fmt.Println("Format doesn't exist yet, SEND US A PR!")
 		}
