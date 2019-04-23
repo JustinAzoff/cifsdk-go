@@ -4,12 +4,14 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/davecgh/go-spew/spew"
+	resty "gopkg.in/resty.v1"
 )
 
 // VERSION
@@ -51,9 +53,8 @@ func getEnvWithDefault(key, fallback string) string {
 	return value
 }
 
-func ToCsv(f *Feed) {
-
-	w := csv.NewWriter(os.Stdout)
+func ToCsv(f *Feed, ow io.Writer) {
+	w := csv.NewWriter(ow)
 
 	for _, i := range f.Indicators {
 		r := []string{
@@ -74,7 +75,7 @@ func ToCsv(f *Feed) {
 		}
 	}
 
-	// Write any buffered data to the underlying writer (standard output).
+	// Write any buffered data to the underlying writer
 	w.Flush()
 
 	if err := w.Error(); err != nil {
