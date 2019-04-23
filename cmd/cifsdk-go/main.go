@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	cif "github.com/JustinAzoff/cifsdk-go"
-	"github.com/davecgh/go-spew/spew"
 )
 
 //https://www.scaledrone.com/blog/creating-an-api-client-in-go/
@@ -39,14 +38,16 @@ func main() {
 	}
 
 	if *indicator != "" {
-		var i = &cif.Indicator{
+		var i = cif.Indicator{
 			Indicator:   *indicator,
 			Tags:        strings.Split(*tags, ","),
 			Description: *description,
 		}
 
-		var r = c.CreateIndicator(i)
-		spew.Dump(r)
+		var err = c.CreateIndicators(&cif.IndicatorList{i})
+		if err != nil {
+			log.Fatal(err)
+		}
 	} else {
 		var f, err = c.GetIndicators(*feed, *limit)
 		if err != nil {

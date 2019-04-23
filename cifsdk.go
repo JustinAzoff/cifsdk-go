@@ -47,14 +47,10 @@ type Client struct {
 	Debug    bool
 }
 
-type indicatorReq struct {
-	Indicator *Indicator `json:"indicator"`
-}
-
-func (c *Client) CreateIndicator(i *Indicator) error {
+func (c *Client) CreateIndicators(i *IndicatorList) error {
 	url := fmt.Sprintf("%s/indicators/", c.Endpoint)
 
-	s, err := json.Marshal(&indicatorReq{i})
+	s, err := json.Marshal(i)
 	if err != nil {
 		return err
 	}
