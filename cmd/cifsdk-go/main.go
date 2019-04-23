@@ -44,7 +44,7 @@ func main() {
 			Description: *description,
 		}
 
-		var err = c.CreateIndicators(&cif.IndicatorList{i})
+		var err = c.CreateIndicators(cif.IndicatorList{i})
 		if err != nil {
 			log.Fatal(err)
 		}

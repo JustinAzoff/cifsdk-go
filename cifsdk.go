@@ -48,7 +48,7 @@ type Client struct {
 	Debug    bool
 }
 
-func (c *Client) CreateIndicators(i *IndicatorList) error {
+func (c *Client) CreateIndicators(i IndicatorList) error {
 	resty.SetTimeout(15 * time.Second)
 	url := fmt.Sprintf("%s/indicators/", c.Endpoint)
 
