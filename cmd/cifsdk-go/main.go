@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/csirtgadgets/csirtgsdk-go/csirtgsdk"
+	cif "github.com/JustinAzoff/cifsdk-go"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -32,19 +32,19 @@ func main() {
 	//}
 
 	if *indicator != "" {
-		var i = &csirtgsdk.Indicator{
+		var i = &cif.Indicator{
 			Indicator:   *indicator,
 			Tags:        strings.Split(*tags, ","),
 			Description: *description,
 		}
 
-		var r = csirtgsdk.CreateIndicator(token, *user, *feed, i)
+		var r = cif.CreateIndicator(token, *user, *feed, i)
 		spew.Dump(r)
 	} else {
-		var f = csirtgsdk.GetFeed(token, *user, *feed, *limit)
+		var f = cif.GetFeed(token, *user, *feed, *limit)
 
 		if *format == "csv" {
-			csirtgsdk.ToCsv(f, os.Stdout)
+			cif.ToCsv(f, os.Stdout)
 		} else {
 			fmt.Println("Format doesn't exist yet, SEND US A PR!")
 		}

@@ -1,4 +1,4 @@
-package csirtgsdk
+package cifsdk
 
 import (
 	"encoding/csv"
