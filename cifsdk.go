@@ -3,6 +3,7 @@ package cifsdk
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -69,7 +70,7 @@ func (c *Client) CreateIndicators(i IndicatorList) error {
 	}
 
 	if c.Debug {
-		spew.Dump(resp)
+		log.Printf("Response %s", spew.Sdump(resp))
 	}
 
 	return nil
@@ -97,7 +98,7 @@ func (c *Client) GetIndicators(itype string, limit string) (IndicatorList, error
 		return nil, err
 	}
 	if c.Debug {
-		spew.Dump(resp)
+		log.Printf("Response %s", spew.Sdump(resp))
 	}
 
 	lst := resp.Result().(*IndicatorList)
